@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MenuAction } from "./components/arcade";
 import {
@@ -227,35 +228,35 @@ function App() {
   const gameProps: GameProps | null =
     currentGame && peer.localPlayerId
       ? {
-          players: peer.players.map((p, i) => ({
-            id: p.id,
-            name: p.name,
-            index: i,
-            isHost: p.isHost,
-            isConnected: p.isConnected !== false, // Default to true if undefined
-          })),
-          localPlayerId: peer.localPlayerId,
-          isMyTurn: peer.players[0]?.id === peer.localPlayerId, // Host goes first
-          sendMessage: (message: GameMessage) => {
-            peer.sendGameMessage(message.type, message.payload);
-          },
-          lastMessage: peer.lastGameMessage
-            ? {
-                type: peer.lastGameMessage.type,
-                payload: peer.lastGameMessage.data,
-                senderId: peer.lastGameMessage.senderId || "",
-                timestamp: Date.now(),
-              }
-            : null,
-          onGameEnd: handleGameEnd,
-          onForfeit: handleForfeit,
-          onExit: handleExitGame,
-          onReturnToLobby: handleForfeit, // Reuse forfeit handler since it goes to lobby
-          disconnectedPlayerIds,
-          gameSettings: peer.selectedGame
-            ? peer.lobbySettings.gameSettings[peer.selectedGame] || {}
-            : {},
-        }
+        players: peer.players.map((p, i) => ({
+          id: p.id,
+          name: p.name,
+          index: i,
+          isHost: p.isHost,
+          isConnected: p.isConnected !== false, // Default to true if undefined
+        })),
+        localPlayerId: peer.localPlayerId,
+        isMyTurn: peer.players[0]?.id === peer.localPlayerId, // Host goes first
+        sendMessage: (message: GameMessage) => {
+          peer.sendGameMessage(message.type, message.payload);
+        },
+        lastMessage: peer.lastGameMessage
+          ? {
+            type: peer.lastGameMessage.type,
+            payload: peer.lastGameMessage.data,
+            senderId: peer.lastGameMessage.senderId || "",
+            timestamp: Date.now(),
+          }
+          : null,
+        onGameEnd: handleGameEnd,
+        onForfeit: handleForfeit,
+        onExit: handleExitGame,
+        onReturnToLobby: handleForfeit, // Reuse forfeit handler since it goes to lobby
+        disconnectedPlayerIds,
+        gameSettings: peer.selectedGame
+          ? peer.lobbySettings.gameSettings[peer.selectedGame] || {}
+          : {},
+      }
       : null;
 
   // Render current screen
@@ -373,12 +374,13 @@ function App() {
       {renderScreen()}
       {(peer.error ||
         (peer.joinStatus && peer.joinStatus !== "connecting")) && (
-        <JoinStatusModal
-          status={peer.joinStatus}
-          error={peer.error}
-          onClose={handleErrorClose}
-        />
-      )}
+          <JoinStatusModal
+            status={peer.joinStatus}
+            error={peer.error}
+            onClose={handleErrorClose}
+          />
+        )}
+      <Analytics />
     </>
   );
 }
