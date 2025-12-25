@@ -161,9 +161,9 @@ export function LobbyScreen({
                 >
                   <input
                     type="checkbox"
+                    className="arcade-checkbox"
                     checked={requiresRequest}
                     onChange={onToggleRequiresRequest}
-                    style={{ accentColor: "var(--arcade-primary)" }}
                   />
                   APPROVE JOINS
                 </label>

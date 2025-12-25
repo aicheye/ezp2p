@@ -137,6 +137,15 @@ export function usePeer({
   const isGameStartedRef = useLatest(isGameStarted);
   const lobbySettingsRef = useLatest(lobbySettings);
   const errorRef = useLatest(error);
+  // Immediate error ref to avoid race conditions where effects update refs
+  // after event handlers run (e.g., kick -> host close). Use `setErrorImmediate`
+  // to update state and this ref synchronously.
+  const errorImmediateRef = useRef<string | null>(error);
+  const setErrorImmediate = useCallback((val: string | null | ((prev: string | null) => string | null)) => {
+    const newVal = typeof val === 'function' ? val(errorImmediateRef.current) : val;
+    errorImmediateRef.current = newVal;
+    setError(newVal);
+  }, []);
   const joinStatusRef = useLatest(joinStatus);
 
   useEffect(() => {
@@ -191,7 +200,7 @@ export function usePeer({
       }
 
       if (!options.keepError) {
-        setError(null);
+        setErrorImmediate(null);
       }
     },
     [],
@@ -244,7 +253,7 @@ export function usePeer({
         setLobbySettings,
         setIsGameStarted,
         setLastGameMessage,
-        setError,
+        setError: setErrorImmediate,
 
         // Helpers
         cleanup,
@@ -401,7 +410,7 @@ export function usePeer({
           // We assume those handlers have already run or will run immediately.
           // If the socket closes naturally without a specific prior event, it's an unexpected disconnect.
           if (
-            errorRef.current ||
+            errorImmediateRef.current ||
             (joinStatusRef.current &&
               joinStatusRef.current !== "connecting" &&
               joinStatusRef.current !== "waiting-approval")
@@ -415,7 +424,7 @@ export function usePeer({
           }
 
           // Host disconnected unexpectedly
-          setError("Host disconnected");
+          setErrorImmediate("Host disconnected");
           cleanup({ keepError: true });
         } else {
           // GUEST DISCONNECTED
@@ -527,7 +536,7 @@ export function usePeer({
                 ).length;
                 if (connectedCount <= 1) {
                   setStatus("disconnected");
-                  setError("Game ended: not enough players");
+                  setErrorImmediate("Game ended: not enough players");
                   cleanup({ keepError: true });
                 }
               } else {
@@ -637,14 +646,14 @@ export function usePeer({
               createLobby(existingCode, retryCount + 1);
             }, 1000);
           } else {
-            setError(
+            setErrorImmediate(
               `Connection failed after 3 attempts (${err.type}). Try again later.`,
             );
             setStatus("error");
           }
         } else {
           // Fatal errors (e.g. invalid-id, ssl-unavailable)
-          setError(`Connection error: ${err.type}`);
+          setErrorImmediate(`Connection error: ${err.type}`);
           setStatus("error");
         }
       });
@@ -696,7 +705,7 @@ export function usePeer({
             console.error(
               "[P2P] Connection timed out after multiple attempts.",
             );
-            setError("Connection timed out. Host may be offline.");
+            setErrorImmediate("Connection timed out. Host may be offline.");
             setStatus("error");
             cleanup({ keepError: true });
           }
@@ -731,7 +740,7 @@ export function usePeer({
             return;
           }
 
-          setError("Could not connect to lobby");
+          setErrorImmediate("Could not connect to lobby");
           setStatus("error");
         });
 
@@ -766,15 +775,15 @@ export function usePeer({
         }
 
         if (err.type === "peer-unavailable") {
-          setError(
+          setErrorImmediate(
             "Lobby not found. The host may have closed it or you have an incorrect code.",
           );
         } else if (err.type === "invalid-id") {
-          setError("Invalid lobby code.");
+          setErrorImmediate("Invalid lobby code.");
         } else if (err.type === "browser-incompatible") {
-          setError("Browser incompatible with PeerJS/webrtc.");
+          setErrorImmediate("Browser incompatible with PeerJS/webrtc.");
         } else {
-          setError(`Connection error: ${err.type || "Unknown error"}`);
+          setErrorImmediate(`Connection error: ${err.type || "Unknown error"}`);
         }
 
         setStatus("error");
@@ -1151,7 +1160,7 @@ export function usePeer({
   );
 
   const clearError = useCallback(() => {
-    setError(null);
+    setErrorImmediate(null);
   }, []);
 
   return {

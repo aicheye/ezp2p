@@ -31,7 +31,7 @@
   flex-direction: column;
   align-items: center;
   border: 1px solid transparent;
-  transition: all 0.2s ease;
+  transition: none;
   min-width: 80px;
 }
 
@@ -146,7 +146,7 @@
   position: absolute;
   background: transparent;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: none;
   z-index: 5;
 }
 

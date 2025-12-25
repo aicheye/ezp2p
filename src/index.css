@@ -20,18 +20,17 @@
   --player2-color: #ff4444;
   --player3-color: #ffcc00;
   --player4-color: #aa66ff;
-  --glow-player1: rgba(0, 204, 255, 0.6);
-  --glow-player2: rgba(255, 68, 68, 0.6);
-  --glow-player3: rgba(255, 204, 0, 0.6);
-  --glow-player4: rgba(170, 102, 255, 0.6);
+  --glow-player1: rgba(0, 204, 255, 0.3);
+  --glow-player2: rgba(255, 68, 68, 0.3);
+  --glow-player3: rgba(255, 204, 0, 0.3);
+  --glow-player4: rgba(170, 102, 255, 0.3);
 
   /* Glow colors */
-  --glow-primary: rgba(0, 255, 136, 0.6);
-  --glow-secondary: rgba(255, 0, 170, 0.6);
-  --glow-accent: rgba(255, 102, 204, 0.6);
-  --glow-warning: rgba(255, 170, 0, 0.6);
-  --glow-danger: rgba(255, 0, 0, 0.6);
-
+  --glow-primary: rgba(0, 255, 136, 0.3);
+  --glow-secondary: rgba(255, 0, 170, 0.3);
+  --glow-accent: rgba(255, 102, 204, 0.3);
+  --glow-warning: rgba(255, 170, 0, 0.3);
+  --glow-danger: rgba(255, 0, 0, 0.3);
   /* CRT effects */
   --scanline-color: rgba(0, 0, 0, 0.25);
   --noise-opacity: 0.05;
@@ -401,17 +400,15 @@ body {
 }
 
 /* Glowing text effect */
-.glow-text {
+  .glow-text {
   text-shadow:
-    0 0 10px currentColor,
-    0 0 20px currentColor,
-    0 0 40px currentColor;
+    0 0 6px currentColor,
+    0 0 18px currentColor;
 }
 
 .glow-text-soft {
   text-shadow:
-    0 0 5px currentColor,
-    0 0 10px currentColor;
+    0 0 6px currentColor;
 }
 
 /* Heading styles */
@@ -423,9 +420,9 @@ h1,
   text-transform: uppercase;
   letter-spacing: 3px;
   text-shadow:
-    0 0 10px currentColor,
-    0 0 20px currentColor,
-    0 0 40px currentColor;
+    0 0 6px currentColor,
+    0 0 12px currentColor,
+    0 0 18px currentColor;
 }
 
 h2,
@@ -436,8 +433,7 @@ h2,
   text-transform: uppercase;
   letter-spacing: 2px;
   text-shadow:
-    0 0 8px currentColor,
-    0 0 16px currentColor;
+    0 0 6px currentColor;
 }
 
 h3,
@@ -464,7 +460,7 @@ h3,
   letter-spacing: 2px;
   cursor: pointer;
   position: relative;
-  transition: all 0.1s ease;
+  transition: none;
   box-shadow:
     0 0 10px var(--glow-primary),
     inset 0 0 10px rgba(0, 255, 136, 0.1);
@@ -474,6 +470,24 @@ h3,
   .arcade-btn {
     font-size: 1rem;
     padding: 0.5rem 1rem;
+  }
+}
+
+/* Reduce heavy bloom/glow on small screens for readability */
+@media (max-width: 768px) {
+  .glow-text {
+    text-shadow: 0 0 4px currentColor, 0 0 8px currentColor;
+  }
+
+  .glow-text-soft {
+    text-shadow: 0 0 2px currentColor, 0 0 4px currentColor;
+  }
+
+  h1,
+  .heading-xl,
+  h2,
+  .heading-lg {
+    text-shadow: 0 0 6px currentColor, 0 0 8px currentColor;
   }
 }
 
@@ -579,7 +593,7 @@ h3,
   letter-spacing: 4px;
   text-align: center;
   outline: none;
-  transition: all 0.2s ease;
+  transition: none;
 }
 
 .arcade-input:focus {
@@ -592,6 +606,50 @@ h3,
 .arcade-input::placeholder {
   color: var(--arcade-text-dim);
   letter-spacing: 2px;
+}
+
+/* Themed checkbox for arcade UI */
+.arcade-checkbox {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--arcade-primary);
+  background: transparent;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 0 6px var(--glow-primary);
+}
+
+.arcade-checkbox:focus {
+  outline: 2px solid rgba(255,255,255,0.06);
+  outline-offset: 2px;
+}
+
+.arcade-checkbox:checked {
+  background: var(--arcade-primary);
+  box-shadow: 0 0 10px var(--glow-primary), inset 0 0 4px rgba(0,0,0,0.2);
+}
+
+.arcade-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 0.28rem;
+  top: 0.08rem;
+  width: 0.28rem;
+  height: 0.6rem;
+  border: solid var(--arcade-bg);
+  border-width: 0 0.18rem 0.18rem 0;
+  transform: rotate(45deg);
+}
+
+@media (max-width: 480px) {
+  .arcade-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
 }
 
 /* ============================================
@@ -632,8 +690,8 @@ h3,
 .arcade-panel--glow {
   border-color: var(--arcade-primary);
   box-shadow:
-    0 0 20px rgba(0, 255, 136, 0.1),
-    inset 0 0 20px rgba(0, 255, 136, 0.05);
+    0 0 10px rgba(0, 255, 136, 0.06),
+    inset 0 0 10px rgba(0, 255, 136, 0.03);
 }
 
 /* ============================================
@@ -658,8 +716,8 @@ h3,
   background: var(--arcade-bg);
   border: 2px solid var(--arcade-primary);
   box-shadow:
-    0 0 30px rgba(0, 255, 136, 0.2),
-    inset 0 0 15px rgba(0, 255, 136, 0.1);
+    0 0 16px rgba(0, 255, 136, 0.12),
+    inset 0 0 8px rgba(0, 255, 136, 0.06);
   max-width: 500px;
   width: 100%;
   padding: 2.5rem;
@@ -773,7 +831,7 @@ h3,
   color: var(--arcade-text);
   cursor: pointer;
   position: relative;
-  transition: all 0.1s ease;
+  transition: none;
   text-align: left;
 }
 
@@ -785,7 +843,7 @@ h3,
   transform: translateY(-50%);
   opacity: 0;
   color: var(--arcade-primary);
-  transition: opacity 0.1s ease;
+  transition: none;
 }
 
 .menu-item--interactive:hover,
@@ -1026,7 +1084,7 @@ h3,
 .crt-footer a {
   color: var(--arcade-accent);
   text-decoration: none;
-  transition: text-shadow 0.2s ease;
+  transition: none;
 }
 
 .crt-footer a:hover {
@@ -1138,8 +1196,8 @@ h3,
   color: var(--arcade-primary);
   text-shadow:
     0 0 20px var(--glow-primary),
-    0 0 40px var(--glow-primary),
-    0 0 60px var(--glow-primary);
+    0 0 20px var(--glow-primary),
+    0 0 40px var(--glow-primary);
   letter-spacing: 8px;
   line-height: 1;
 }
