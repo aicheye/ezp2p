@@ -382,7 +382,7 @@ export function LobbyScreen({
             {/* Selected Game Info */}
             {selectedGameDef && (
               <div
-                className="arcade-panel arcade-panel--glow text-center"
+                className="arcade-panel arcade-panel--glow"
                 style={{
                   padding: "1.0rem",
                   display: "flex",

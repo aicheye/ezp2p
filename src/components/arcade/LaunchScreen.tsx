@@ -80,6 +80,7 @@ export function LaunchScreen({
           </label>
           <input
             type="text"
+            name="player-name"
             className="arcade-input"
             value={name}
             onChange={(e) => {
@@ -90,6 +91,8 @@ export function LaunchScreen({
             maxLength={10}
             style={{ textAlign: "center", width: "100%", maxWidth: "240px" }}
             autoFocus
+            autoComplete="off"
+            spellCheck={false}
           />
           {error && (
             <div

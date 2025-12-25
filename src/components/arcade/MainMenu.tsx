@@ -190,11 +190,14 @@ export function MainMenu({
             {/* Join Lobby Form */}
             <input
               type="text"
+              name="join-code"
               className="arcade-input lobby-code-input"
               value={joinCode}
               onChange={handleCodeChange}
               placeholder="______"
               autoFocus
+              autoComplete="off"
+              spellCheck={false}
               onKeyDown={(e) => e.key === "Enter" && handleJoinSubmit()}
             />
 
@@ -238,6 +241,7 @@ export function MainMenu({
               </label>
               <input
                 type="text"
+                name="player-name-edit"
                 className="arcade-input"
                 value={editName}
                 onChange={(e) => {
@@ -246,6 +250,8 @@ export function MainMenu({
                 }}
                 maxLength={10}
                 autoFocus
+                autoComplete="off"
+                spellCheck={false}
                 onKeyDown={(e) => e.key === "Enter" && handleNameSubmit()}
                 style={{
                   textAlign: "center",
