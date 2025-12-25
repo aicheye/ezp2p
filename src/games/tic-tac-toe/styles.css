@@ -1,0 +1,170 @@
+/* ============================================
+   TIC TAC TOE GAME STYLES
+   ============================================ */
+
+.ttt-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: var(--arcade-padding);
+}
+
+/* Header with players */
+.ttt-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  gap: 2rem;
+}
+
+/* Player indicators */
+.ttt-player {
+  font-family: var(--font-terminal);
+  text-transform: uppercase;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.ttt-player__name {
+  font-family: var(--font-pixel);
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+}
+
+.ttt-player__symbol {
+  font-family: var(--font-pixel);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.ttt-player--p1 {
+  color: var(--player1-color);
+}
+.ttt-player--p2 {
+  color: var(--player2-color);
+}
+
+.ttt-player--active {
+  border-color: currentColor;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  box-shadow:
+    0 0 15px color-mix(in srgb, currentColor 40%, transparent),
+    inset 0 0 10px color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.ttt-player--active .ttt-player__name,
+.ttt-player--active .ttt-player__symbol {
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* Turn indicator */
+.ttt-turn-indicator {
+  font-family: var(--font-pixel);
+  font-size: 0.75rem;
+  padding: 0.5rem 1.5rem;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  margin-bottom: 1rem;
+}
+
+.ttt-turn-indicator--p1 {
+  color: var(--player1-color);
+  box-shadow: 0 0 15px var(--glow-player1);
+}
+.ttt-turn-indicator--p2 {
+  color: var(--player2-color);
+  box-shadow: 0 0 15px var(--glow-player2);
+}
+
+/* Board */
+.ttt-board-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.ttt-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.ttt-cell {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-pixel);
+  font-size: 3rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ttt-cell:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.ttt-cell:disabled {
+  cursor: default;
+}
+
+.ttt-cell--x {
+  color: var(--player1-color);
+  text-shadow: 0 0 5px var(--glow-player1);
+}
+
+.ttt-cell--o {
+  color: var(--player2-color);
+  text-shadow: 0 0 5px var(--glow-player2);
+}
+
+.ttt-cell--winner {
+  background: color-mix(in srgb, currentColor 20%, transparent);
+  border-color: currentColor;
+  box-shadow: inset 0 0 20px color-mix(in srgb, currentColor 40%, transparent);
+  animation: winner-pulse 1s infinite alternate;
+}
+
+@keyframes winner-pulse {
+  from {
+    box-shadow: inset 0 0 20px color-mix(in srgb, currentColor 40%, transparent);
+  }
+  to {
+    box-shadow: inset 0 0 40px color-mix(in srgb, currentColor 60%, transparent);
+  }
+}
+
+/* Action buttons */
+.ttt-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+@media (max-width: 400px) {
+  .ttt-cell {
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+  }
+}

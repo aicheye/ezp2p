@@ -1,0 +1,353 @@
+/* ============================================
+   DOTS AND BOXES GAME STYLES
+   ============================================ */
+
+.dab-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: var(--arcade-padding);
+}
+
+/* Header with scores - adaptive for player count */
+.dab-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Player indicators */
+.dab-player {
+  font-family: var(--font-terminal);
+  text-transform: uppercase;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+@media (max-width: 480px) {
+  .dab-player {
+    min-width: 70px;
+    padding: 0.25rem 0.5rem;
+  }
+  .dab-player__name {
+    font-size: 0.5rem;
+  }
+  .dab-player__score {
+    font-size: 1rem;
+  }
+}
+
+.dab-player__name {
+  font-family: var(--font-pixel);
+  font-size: 0.625rem;
+  margin-bottom: 0.25rem;
+  white-space: nowrap;
+}
+
+.dab-player__score {
+  font-family: var(--font-pixel);
+  font-size: 1.25rem;
+}
+
+.dab-player--p1 {
+  color: var(--player1-color);
+}
+.dab-player--p2 {
+  color: var(--player2-color);
+}
+.dab-player--p3 {
+  color: var(--player3-color);
+}
+.dab-player--p4 {
+  color: var(--player4-color);
+}
+
+.dab-player--active {
+  border-color: currentColor;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  box-shadow:
+    0 0 15px color-mix(in srgb, currentColor 40%, transparent),
+    inset 0 0 10px color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.dab-player--active .dab-player__name,
+.dab-player--active .dab-player__score {
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* Turn indicator - below header */
+.dab-turn-indicator {
+  font-family: var(--font-pixel);
+  font-size: 0.625rem;
+  padding: 0.5rem 1.5rem;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  margin-top: 1rem;
+}
+
+.dab-turn-indicator--p1 {
+  color: var(--player1-color);
+  box-shadow: 0 0 15px var(--glow-player1);
+}
+.dab-turn-indicator--p2 {
+  color: var(--player2-color);
+  box-shadow: 0 0 15px var(--glow-player2);
+}
+.dab-turn-indicator--p3 {
+  color: var(--player3-color);
+  box-shadow: 0 0 15px var(--glow-player3);
+}
+.dab-turn-indicator--p4 {
+  color: var(--player4-color);
+  box-shadow: 0 0 15px var(--glow-player4);
+}
+
+/* Board wrapper for centering */
+.dab-board-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Game board */
+.dab-board {
+  position: relative;
+  display: grid;
+  gap: 0;
+}
+
+/* Dots */
+.dab-dot {
+  width: 12px;
+  height: 12px;
+  background: var(--arcade-text);
+  border-radius: 50%;
+  box-shadow:
+    0 0 5px var(--arcade-text),
+    0 0 10px rgba(255, 255, 255, 0.3);
+  z-index: 10;
+}
+
+/* Lines */
+.dab-line {
+  position: absolute;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: 5;
+}
+
+.dab-line:hover:not(.dab-line--drawn) {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 0 5px var(--arcade-text),
+    0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.dab-line--horizontal {
+  height: 8px;
+  transform: translateY(-50%);
+}
+
+.dab-line--vertical {
+  width: 8px;
+  transform: translateX(-50%);
+}
+
+.dab-line--drawn {
+  cursor: default;
+}
+
+.dab-line--p1 {
+  background: var(--player1-color);
+  box-shadow:
+    0 0 5px var(--glow-player1),
+    0 0 10px var(--glow-player1);
+}
+.dab-line--p2 {
+  background: var(--player2-color);
+  box-shadow:
+    0 0 5px var(--glow-player2),
+    0 0 10px var(--glow-player2);
+}
+.dab-line--p3 {
+  background: var(--player3-color);
+  box-shadow:
+    0 0 5px var(--glow-player3),
+    0 0 10px var(--glow-player3);
+}
+.dab-line--p4 {
+  background: var(--player4-color);
+  box-shadow:
+    0 0 5px var(--glow-player4),
+    0 0 10px var(--glow-player4);
+}
+
+.dab-line--preview-p1 {
+  background: color-mix(in srgb, var(--player1-color) 7%, transparent);
+}
+.dab-line--preview-p2 {
+  background: color-mix(in srgb, var(--player2-color) 7%, transparent);
+}
+.dab-line--preview-p3 {
+  background: color-mix(in srgb, var(--player3-color) 7%, transparent);
+}
+.dab-line--preview-p4 {
+  background: color-mix(in srgb, var(--player4-color) 7%, transparent);
+}
+
+/* Boxes */
+.dab-box {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-pixel);
+  font-size: 0.75rem;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Scanline reveal effect */
+.dab-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  clip-path: inset(0 0 100% 0);
+  animation: box-scan-reveal 0.4s ease-out forwards;
+}
+
+/* Glowing scan line */
+.dab-box::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  top: 0;
+  animation: box-scanline 0.4s ease-out forwards;
+}
+
+.dab-box--p1::after {
+  background: var(--player1-color);
+  box-shadow:
+    0 0 8px var(--player1-color),
+    0 0 16px var(--player1-color),
+    0 0 24px var(--glow-player1);
+}
+
+.dab-box--p2::after {
+  background: var(--player2-color);
+  box-shadow:
+    0 0 8px var(--player2-color),
+    0 0 16px var(--player2-color),
+    0 0 24px var(--glow-player2);
+}
+
+.dab-box--p3::after {
+  background: var(--player3-color);
+  box-shadow:
+    0 0 8px var(--player3-color),
+    0 0 16px var(--player3-color),
+    0 0 24px var(--glow-player3);
+}
+
+.dab-box--p4::after {
+  background: var(--player4-color);
+  box-shadow:
+    0 0 8px var(--player4-color),
+    0 0 16px var(--player4-color),
+    0 0 24px var(--glow-player4);
+}
+
+/* The scan reveal animation */
+@keyframes box-scan-reveal {
+  0% {
+    clip-path: inset(0 0 100% 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* The moving scanline */
+@keyframes box-scanline {
+  0% {
+    top: 0;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* Symbol fade in after scan */
+.dab-box > * {
+  opacity: 0;
+  animation: symbol-fade 0.2s ease-out 0.35s forwards;
+}
+
+@keyframes symbol-fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.dab-box--p1 {
+  background: color-mix(in srgb, var(--player1-color) 15%, transparent);
+  color: var(--player1-color);
+  border: 1px solid color-mix(in srgb, var(--player1-color) 30%, transparent);
+}
+
+.dab-box--p2 {
+  background: color-mix(in srgb, var(--player2-color) 15%, transparent);
+  color: var(--player2-color);
+  border: 1px solid color-mix(in srgb, var(--player2-color) 30%, transparent);
+}
+
+.dab-box--p3 {
+  background: color-mix(in srgb, var(--player3-color) 15%, transparent);
+  color: var(--player3-color);
+  border: 1px solid color-mix(in srgb, var(--player3-color) 30%, transparent);
+}
+
+.dab-box--p4 {
+  background: color-mix(in srgb, var(--player4-color) 15%, transparent);
+  color: var(--player4-color);
+  border: 1px solid color-mix(in srgb, var(--player4-color) 30%, transparent);
+}
+
+/* Action buttons */
+.dab-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .dab-actions {
+    margin-bottom: 2rem;
+  }
+}
