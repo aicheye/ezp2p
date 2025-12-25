@@ -78,7 +78,9 @@ export function LobbyScreen({
 
   const handleCopyCode = async () => {
     try {
-      const url = `${window.location.origin}/${lobbyCode}`;
+      const url = `${window.location.origin}/?code=${encodeURIComponent(
+        lobbyCode,
+      )}`;
       await navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

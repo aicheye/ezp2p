@@ -170,10 +170,10 @@ function App() {
   // Sync URL with lobby code
   useEffect(() => {
     if (currentScreen === "lobby" && peer.lobbyCode) {
-      window.history.replaceState({}, "", `/${peer.lobbyCode}`);
+      window.history.replaceState({}, "", `/?code=${peer.lobbyCode}`);
     } else if (currentScreen === "menu") {
       // Only update if we're not already at root
-      if (window.location.pathname !== "/") {
+      if (window.location.pathname !== "/" || window.location.search !== "") {
         window.history.replaceState({}, "", "/");
       }
     }
@@ -201,14 +201,15 @@ function App() {
     sessionStorage.removeItem("ezp2p-hostPlayers");
     sessionStorage.removeItem("ezp2p-hostSettings");
 
-    const path = window.location.pathname.slice(1).toUpperCase();
-    if (path && isValidLobbyCode(path)) {
+    const params = new URLSearchParams(window.location.search);
+    const codeParam = params.get("code")?.toUpperCase();
+    if (codeParam && isValidLobbyCode(codeParam)) {
       // Skip boot/launch screens and join/host lobby directly
       setCurrentScreen("menu");
       // Small delay to ensure peer is ready
       setTimeout(() => {
-        console.log("[App] Joining lobby from URL:", path);
-        peer.joinLobby(path);
+        console.log("[App] Joining lobby from URL:", codeParam);
+        peer.joinLobby(codeParam);
         setCurrentScreen("lobby");
       }, 100);
     }

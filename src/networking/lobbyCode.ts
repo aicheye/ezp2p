@@ -28,14 +28,22 @@ export function normalizeLobbyCode(code: string): string {
 }
 
 /**
- * Extract a lobby code from a URL.
- * Looks for the last 6 alphanumeric characters in the URL path.
- * Returns null if no valid code is found.
+ * Extract a lobby code from a URL or raw string.
+ * Prefer a `?code=XXXXXX` search parameter, but fall back to legacy
+ * path-based extraction and a last-6-chars heuristic for robustness.
  */
 export function extractCodeFromUrl(input: string): string | null {
   // Try to parse as URL first
   try {
     const url = new URL(input);
+    // Prefer explicit query param `?code=`
+    const codeParam = url.searchParams.get("code");
+    if (codeParam) {
+      const norm = normalizeLobbyCode(codeParam);
+      if (isValidLobbyCode(norm)) return norm;
+    }
+
+    // Fallback: legacy support — check last path segment
     const pathSegments = url.pathname.split("/").filter(Boolean);
     if (pathSegments.length > 0) {
       const lastSegment = pathSegments[pathSegments.length - 1].toUpperCase();
@@ -44,10 +52,10 @@ export function extractCodeFromUrl(input: string): string | null {
       }
     }
   } catch {
-    // Not a valid URL, try extracting last 6 chars
+    // Not a valid URL, fall through to heuristic
   }
 
-  // Fallback: extract last 6 alphanumeric chars
+  // Heuristic: extract last 6 alphanumeric chars from the input
   const alphanumeric = input.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
   if (alphanumeric.length >= 6) {
     const code = alphanumeric.slice(-6);
