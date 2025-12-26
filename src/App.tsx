@@ -1,5 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
-import { use, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { MenuAction } from "./components/arcade";
 import {
   BootScreen,
