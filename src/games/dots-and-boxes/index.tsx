@@ -1,5 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import { Modal } from "../../components/arcade";
+import { audio } from "../../sound/audio";
 import { useGameEngine } from "../hooks";
 import type { GameDefinition, GameProps, GameSettingsProps } from "../types";
 import { Board } from "./Board";
@@ -29,6 +30,10 @@ function DotsAndBoxesGame(props: GameProps) {
   } = props;
   const initialGridSize = gameSettings.gridSize || 5;
   const [showConfirmExit, setShowConfirmExit] = useState(false);
+  // Prepare initial state to track score deltas for sound
+  const initialState = createInitialState(props.players.length, initialGridSize);
+  const prevScoresRef = useRef<number[]>(initialState.scores.slice());
+  const myPlayerIndex = props.players.findIndex((p) => p.id === props.localPlayerId);
   const [opponentLeftMessage, setOpponentLeftMessage] = useState<
     "left" | "forfeit" | null
   >(null);
@@ -36,16 +41,27 @@ function DotsAndBoxesGame(props: GameProps) {
   const { gameState, proposeMove, pendingMove, localPlayerIndex } =
     useGameEngine<DotsAndBoxesState, Move>({
       ...props,
-      initialState: createInitialState(props.players.length, initialGridSize),
+      initialState,
       validateMove,
       applyMove,
-      onMoveApplied: (newState) => {
+      onMoveApplied: (newState, _move) => {
+        // Play point sounds for score increases
+        if (prevScoresRef.current) {
+          for (let i = 0; i < newState.scores.length; i++) {
+            const delta = newState.scores[i] - (prevScoresRef.current[i] ?? 0);
+            for (let p = 0; p < delta; p++) {
+              audio.playPoint();
+            }
+          }
+        }
+        // Update prevScores
+        prevScoresRef.current = newState.scores.slice();
+
         if (newState.isGameOver) {
           const scores: Record<string, number> = {};
           props.players.forEach((p, i) => {
             scores[p.id] = newState.scores[i];
           });
-
           props.onGameEnd({
             winnerId:
               newState.winners.length === 1
@@ -124,6 +140,8 @@ function DotsAndBoxesGame(props: GameProps) {
         return;
       if (isLineDrawn(gameState, line)) return;
 
+      // Play interaction sound
+      audio.playLongBlip();
       proposeMove({ line, playerId: localPlayerIndex });
     },
     [
@@ -171,6 +189,22 @@ function DotsAndBoxesGame(props: GameProps) {
     });
     onExit?.();
   };
+
+  // Play win/loss SFX when the Game Over modal opens (once)
+  const prevGameOverRef = useRef<boolean>(false);
+  if (typeof window !== "undefined") {
+    // ensure hooks rules: useEffect below
+  }
+  useEffect(() => {
+    if (!prevGameOverRef.current && gameState.isGameOver) {
+      if (gameState.winners.includes(myPlayerIndex)) {
+        audio.playWin();
+      } else {
+        audio.playLoss();
+      }
+    }
+    prevGameOverRef.current = gameState.isGameOver;
+  }, [gameState.isGameOver, gameState.winners, myPlayerIndex]);
 
   return (
     <div className="dab-container">

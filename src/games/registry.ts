@@ -1,12 +1,13 @@
 import { DotsAndBoxes } from "./dots-and-boxes/index";
 import { TicTacToe } from "./tic-tac-toe/index";
+import { Quoridor } from "./quoridor/index";
 import type { GameDefinition } from "./types";
 
 /**
  * Central registry of all available games.
  * Add new games here to make them available in the lobby.
  */
-export const gameRegistry: GameDefinition[] = [DotsAndBoxes, TicTacToe];
+export const gameRegistry: GameDefinition[] = [DotsAndBoxes, TicTacToe, Quoridor];
 
 /**
  * Get a game definition by ID.

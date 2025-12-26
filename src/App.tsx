@@ -1,5 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { MenuAction } from "./components/arcade";
 import {
   BootScreen,
@@ -9,17 +9,24 @@ import {
   LaunchScreen,
   LobbyScreen,
   MainMenu,
+  Modal,
 } from "./components/arcade";
 import { getAllGames, getGame } from "./games/registry";
 import type { GameMessage, GameProps } from "./games/types";
 import "./index.css";
 import { usePeer } from "./networking";
 import { isValidLobbyCode } from "./networking/lobbyCode";
+import { audio } from "./sound/audio";
 
 type Screen = "boot" | "launch" | "menu" | "lobby" | "game";
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("boot");
+  const [powerOn, setPowerOn] = useState(false);
+  const [powerHover, setPowerHover] = useState(false);
+  const [powerPressed, setPowerPressed] = useState(false);
+  const powerTimeoutRef = useRef<number | null>(null);
+  const lastPowerSfxRef = useRef<number>(0);
   const [playerName, setPlayerName] = useState(() => {
     // Try session first (this tab), then local (across tabs)
     return (
@@ -36,43 +43,17 @@ function App() {
     sessionStorage.setItem("ezp2p-playerId", newId);
     return newId;
   });
-
+  // Initialize peer networking
+  const peer = usePeer({ playerName, playerId: localPlayerId });
   // Handle name updates
   const handleUpdateName = useCallback((newName: string) => {
     const formattedName = newName.trim().slice(0, 10);
-    if (formattedName) {
-      setPlayerName(formattedName);
-      sessionStorage.setItem("ezp2p-playerName", formattedName);
-      localStorage.setItem("ezp2p-playerName", formattedName);
-    }
+    setPlayerName(formattedName);
+    sessionStorage.setItem("ezp2p-playerName", formattedName);
+    localStorage.setItem("ezp2p-playerName", formattedName);
   }, []);
 
-  const peer = usePeer({ playerName, playerId: localPlayerId });
-
-  // Convert peer players to lobby player format
-  const lobbyPlayers = useMemo(
-    () =>
-      peer.players.map((p) => ({
-        id: p.id,
-        name: p.name,
-        isHost: p.isHost,
-        isReady: p.isReady ?? false,
-        isConnected: p.isConnected,
-      })),
-    [peer.players],
-  );
-
-  // Handle boot complete
-  const handleBootComplete = useCallback(() => {
-    setCurrentScreen("launch");
-  }, []);
-
-  // Handle launch start
-  const handleLaunchStart = useCallback(() => {
-    setCurrentScreen("menu");
-  }, []);
-
-  // Handle menu selection
+  // Handle menu selection (create/join/browse)
   const handleMenuSelect = useCallback(
     (action: MenuAction, lobbyCode?: string) => {
       switch (action) {
@@ -87,19 +68,23 @@ function App() {
           }
           break;
         case "browse":
-          // Coming soon
+        default:
           break;
       }
     },
     [peer],
   );
+  // Handle boot complete
+  const handleBootComplete = useCallback(() => {
+    setCurrentScreen("launch");
+  }, []);
 
-  // Handle leaving lobby
-  const handleLeaveLobby = useCallback(() => {
-    peer.leaveLobby();
+  // Handle launch start
+  const handleLaunchStart = useCallback(() => {
     setCurrentScreen("menu");
-    window.history.replaceState({}, "", "/");
-  }, [peer]);
+  }, []);
+
+  // (menu selection handled above)
 
   // Handle game selection
   const handleSelectGame = useCallback(
@@ -112,6 +97,14 @@ function App() {
   // Handle game start
   const handleStartGame = useCallback(() => {
     peer.startGame();
+  }, [peer]);
+
+  // Handle leaving lobby (either cancel join or host leaving)
+  const handleLeaveLobby = useCallback(() => {
+    try {
+      peer.leaveLobby();
+    } catch {}
+    setCurrentScreen("menu");
   }, [peer]);
 
   // Handle ready toggle
@@ -155,6 +148,42 @@ function App() {
       setCurrentScreen("game");
     }
   }, [peer.isGameStarted, currentScreen]);
+
+  // Initialize audio and manage music/startup based on screen
+  useEffect(() => {
+    audio.init();
+    // Play startup whenever we are on boot screen and user powered on
+    if (currentScreen === "boot" && powerOn) {
+      audio.playStartup();
+    } else {
+      audio.stopStartup();
+    }
+
+    // Music handling (also play menu music on launch screen)
+    if (currentScreen === "menu" || currentScreen === "lobby" || currentScreen === "launch") {
+      audio.playMenuMusic();
+    } else if (currentScreen === "game") {
+      audio.playGameMusic();
+    } else {
+      audio.stopMusic();
+    }
+
+    return () => {
+      // keep music running between renders; stop on unmount
+    };
+  }, [currentScreen, powerOn]);
+
+  // Clear any pending power timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (powerTimeoutRef.current) {
+        window.clearTimeout(powerTimeoutRef.current);
+        powerTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  // (power-up is handled directly by the centered button handlers)
 
   // Watch for connection errors or kicks (while in lobby)
   useEffect(() => {
@@ -260,11 +289,113 @@ function App() {
       }
       : null;
 
+    // Players formatted for LobbyScreen component
+    const lobbyPlayers = peer.players.map((p) => ({
+      id: p.id,
+      name: p.name,
+      isHost: p.isHost,
+      isReady: p.isReady ?? false,
+      isConnected: p.isConnected !== false,
+    }));
+
   // Render current screen
   const renderScreen = () => {
     switch (currentScreen) {
       case "boot":
-        return <BootScreen onComplete={handleBootComplete} />;
+        return powerOn ? (
+          <BootScreen onComplete={handleBootComplete} />
+        ) : (
+          <div style={{ position: "fixed", inset: 0, background: "#000", zIndex: 9998, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {/* Centered power icon only during boot-off */}
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Power Up"
+              onPointerDown={() => {
+                setPowerPressed(true);
+                if (powerTimeoutRef.current) {
+                  window.clearTimeout(powerTimeoutRef.current);
+                  powerTimeoutRef.current = null;
+                }
+                const now = Date.now();
+                if (now - lastPowerSfxRef.current > 240) {
+                  try { audio.playButtonDown(); } catch { }
+                  lastPowerSfxRef.current = now;
+                }
+              }}
+              onPointerUp={() => {
+                setPowerPressed(false);
+                const now = Date.now();
+                if (now - lastPowerSfxRef.current > 240) {
+                  try { audio.playButtonUp(); } catch { }
+                  lastPowerSfxRef.current = now;
+                }
+                powerTimeoutRef.current = window.setTimeout(() => {
+                  setPowerOn(true);
+                }, 380);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setPowerPressed(true);
+                  if (powerTimeoutRef.current) {
+                    window.clearTimeout(powerTimeoutRef.current);
+                    powerTimeoutRef.current = null;
+                  }
+                  const now = Date.now();
+                  if (now - lastPowerSfxRef.current > 240) {
+                    try { audio.playButtonDown(); } catch { }
+                    lastPowerSfxRef.current = now;
+                  }
+                }
+              }}
+              onKeyUp={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setPowerPressed(false);
+                  const now = Date.now();
+                  if (now - lastPowerSfxRef.current > 240) {
+                    try { audio.playButtonUp(); } catch { }
+                    lastPowerSfxRef.current = now;
+                  }
+                  powerTimeoutRef.current = window.setTimeout(() => {
+                    setPowerOn(true);
+                  }, 380);
+                }
+              }}
+              onPointerEnter={() => setPowerHover(true)}
+              onPointerLeave={() => setPowerHover(false)}
+              style={{
+                width: "92px",
+                height: "92px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                zIndex: 9999,
+                background: "transparent",
+                boxShadow: powerPressed
+                  ? "0 0 6px 2px rgba(0,0,0,0.2) inset"
+                  : powerHover
+                    ? "0 0 30px 10px rgba(255,80,80,0.28)"
+                    : "0 0 10px 3px rgba(255,60,60,0.06)",
+                transition: "box-shadow 100ms ease, transform 80ms ease",
+                transform: powerPressed ? "translateY(2px) scale(0.98)" : (powerHover ? "translateY(-2px) scale(1.02)" : "none"),
+                border: "1px solid rgba(255,60,60,0.12)",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "2.5rem",
+                  color: powerPressed ? "#ff9999" : (powerHover ? "#ff6666" : "#ff4d4d"),
+                  textShadow: powerPressed ? "0 0 8px rgba(255,100,100,0.45)" : (powerHover ? "0 0 20px rgba(255,100,100,0.65)" : "none"),
+                  userSelect: "none",
+                }}
+              >
+                ⏻
+              </div>
+            </div>
+          </div>
+        );
 
       case "launch":
         return (
@@ -329,21 +460,26 @@ function App() {
             </div>
           );
         }
-        // Fallback if game not found
+        // Fallback if game not found -> show modal
         return (
           <CRTScreen>
-            <div
-              className="flex-center flex-col gap-4"
-              style={{ height: "100%" }}
+            <Modal
+              isOpen={true}
+              title="GAME NOT FOUND"
+              variant="danger"
+              onClose={() => setCurrentScreen("menu")}
+              actions={
+                <button className="arcade-btn" onClick={() => setCurrentScreen("menu")}>
+                  RETURN TO MENU
+                </button>
+              }
             >
-              <h2>GAME NOT FOUND</h2>
-              <button
-                className="arcade-btn"
-                onClick={() => setCurrentScreen("menu")}
-              >
-                RETURN TO MENU
-              </button>
-            </div>
+              <div className="flex-center flex-col gap-4" style={{ height: "100%" }}>
+                <p className="terminal-text color-dim" style={{ fontSize: "1rem" }}>
+                  The selected game could not be found. It may have been removed or is not available.
+                </p>
+              </div>
+            </Modal>
           </CRTScreen>
         );
 

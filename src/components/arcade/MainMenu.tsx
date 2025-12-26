@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { extractCodeFromUrl } from "../../networking/lobbyCode";
+import { audio } from "../../sound/audio";
 import { CRTScreen } from "./CRTScreen";
 
 export type MenuAction = "create" | "join" | "browse";
@@ -37,10 +38,12 @@ export function MainMenu({
     const code = joinCode.toUpperCase().trim();
     if (code.length !== 6) {
       setError("CODE MUST BE 6 CHARACTERS");
+      audio.playErr();
       return;
     }
     if (!/^[A-Z0-9]+$/.test(code)) {
       setError("LETTERS AND NUMBERS ONLY");
+      audio.playErr();
       return;
     }
     setError("");
@@ -49,6 +52,7 @@ export function MainMenu({
 
   const handleMenuSelect = useCallback(
     (index: number) => {
+      audio.playClick();
       const item = menuItems[index];
       if (item.action === "create") {
         onSelect("create");
@@ -65,10 +69,13 @@ export function MainMenu({
     [onSelect],
   );
 
+  // Navigation sound is triggered explicitly in keyboard handlers and on menu item click
+
   const handleNameSubmit = useCallback(() => {
     const trimmed = editName.trim();
     if (!trimmed) {
       setError("NAME CANNOT BE EMPTY");
+      audio.playErr();
       return;
     }
     onNameChange(trimmed);
@@ -108,6 +115,8 @@ export function MainMenu({
         case "w":
         case "W":
           e.preventDefault();
+          // Keyboard navigation: play navigation sound
+          audio.playClick();
           setSelectedIndex(
             (prev) => (prev - 1 + menuItems.length) % menuItems.length,
           );
@@ -116,6 +125,8 @@ export function MainMenu({
         case "s":
         case "S":
           e.preventDefault();
+          // Keyboard navigation: play navigation sound
+          audio.playClick();
           setSelectedIndex((prev) => (prev + 1) % menuItems.length);
           break;
         case "Enter":
@@ -129,6 +140,7 @@ export function MainMenu({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [mode, selectedIndex, handleMenuSelect]);
+
 
   return (
     <CRTScreen>

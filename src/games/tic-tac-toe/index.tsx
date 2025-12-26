@@ -6,6 +6,7 @@ import { Board } from "./Board";
 import type { Move, TicTacToeState } from "./logic";
 import { applyMove, createInitialState, validateMove } from "./logic";
 import "./styles.css";
+import { audio } from "../../sound/audio";
 
 /**
  * Tic Tac Toe P2P Game Component.
@@ -80,6 +81,21 @@ function TicTacToeGame(props: GameProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState.isGameOver]);
 
+  // Play win/loss SFX when the Game Over modal actually opens (aligned with UI)
+  useEffect(() => {
+    if (delayedGameOver && gameState.isGameOver) {
+      try {
+        if (gameState.winner === null) {
+          audio.playLongBlip();
+        } else if (gameState.winner === localPlayerIndex) {
+          audio.playWin();
+        } else {
+          audio.playLoss();
+        }
+      } catch {}
+    }
+  }, [delayedGameOver, gameState.isGameOver, gameState.winner, localPlayerIndex]);
+
   // Check if opponent has disconnected
   const opponentDisconnected = disconnectedPlayerIds.some(
     (id) => id !== localPlayerId,
@@ -100,6 +116,10 @@ function TicTacToeGame(props: GameProps) {
         !!pendingMove
       )
         return;
+
+      try {
+        audio.playLongBlip();
+      } catch {}
 
       proposeMove({ row, col, playerId: localPlayerIndex });
     },

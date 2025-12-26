@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { audio } from "../../sound/audio";
 import { CRTScreen } from "./CRTScreen";
 
 interface LaunchScreenProps {
@@ -22,12 +23,16 @@ export function LaunchScreen({
     const trimmedName = name.trim();
     if (!trimmedName) {
       setError("PLEASE ENTER A NAME");
+      audio.playErr();
       return;
     }
     if (trimmedName.length > 10) {
       setError("MAX 10 CHARACTERS");
+      audio.playErr();
       return;
     }
+    // Play start sound (use win SFX as requested)
+    audio.playWin();
     onNameChange(trimmedName);
     onStart();
   }, [name, onNameChange, onStart]);

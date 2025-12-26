@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { GameDefinition } from "../../games/types";
 import type { PendingJoinRequest } from "../../networking/types";
+import { audio } from "../../sound/audio";
 import { CRTScreen } from "./CRTScreen";
 
 export interface Player {
@@ -86,6 +87,12 @@ export function LobbyScreen({
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
+      // Play error sound for failed copy
+      try {
+        // lazy import to avoid circular issues
+        const { audio } = await import("../../sound/audio");
+        audio.playErr();
+      } catch { }
     }
   };
 
@@ -364,7 +371,11 @@ export function LobbyScreen({
                       fontSize: "0.75rem",
                       textAlign: "left",
                     }}
-                    onClick={() => isHost && onSelectGame(game.id)}
+                    onClick={() => {
+                      if (!isHost) return;
+                      audio.playClick();
+                      onSelectGame(game.id);
+                    }}
                   >
                     <div>{game.name}</div>
                     <div
@@ -421,7 +432,7 @@ export function LobbyScreen({
           {isHost ? (
             <button
               className={`arcade-btn ${canStart ? "" : "arcade-btn--disabled"}`}
-              onClick={onStartGame}
+              onClick={() => { if (canStart) { audio.playClick(); onStartGame(); } }}
               disabled={!canStart}
               style={{ opacity: canStart ? 1 : 0.5 }}
             >
@@ -445,7 +456,7 @@ export function LobbyScreen({
           )}
           <button
             className="arcade-btn arcade-btn--secondary"
-            onClick={onLeaveLobby}
+            onClick={() => { audio.playClick(); onLeaveLobby(); }}
           >
             LEAVE
           </button>

@@ -1,14 +1,16 @@
+import { useEffect } from "react";
+import { audio } from "../../sound/audio";
 import { Modal } from "./Modal";
 
 interface JoinStatusModalProps {
   status:
-    | "not-found"
-    | "capacity-reached"
-    | "in-game"
-    | "denied"
-    | "waiting-approval"
-    | "connecting"
-    | null;
+  | "not-found"
+  | "capacity-reached"
+  | "in-game"
+  | "denied"
+  | "waiting-approval"
+  | "connecting"
+  | null;
   error?: string | null;
   onClose: () => void;
 }
@@ -67,6 +69,13 @@ export function JoinStatusModal({
   };
 
   const variant = isWaiting ? "secondary" : "danger";
+
+  useEffect(() => {
+    // Play error sound for error/denied states when modal appears
+    if (error || status === "not-found" || status === "capacity-reached" || status === "in-game" || status === "denied") {
+      audio.playErr();
+    }
+  }, [error, status]);
 
   return (
     <Modal
