@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Modal } from "../../components/arcade";
+import { audio } from "../../sound/audio";
 import { useGameEngine } from "../hooks";
 import type { GameDefinition, GameProps } from "../types";
 import { Board } from "./Board";
 import type { Move, TicTacToeState } from "./logic";
 import { applyMove, createInitialState, validateMove } from "./logic";
 import "./styles.css";
-import { audio } from "../../sound/audio";
 
 /**
  * Tic Tac Toe P2P Game Component.
@@ -92,7 +92,7 @@ function TicTacToeGame(props: GameProps) {
         } else {
           audio.playLoss();
         }
-      } catch {}
+      } catch { }
     }
   }, [delayedGameOver, gameState.isGameOver, gameState.winner, localPlayerIndex]);
 
@@ -119,7 +119,7 @@ function TicTacToeGame(props: GameProps) {
 
       try {
         audio.playLongBlip();
-      } catch {}
+      } catch { }
 
       proposeMove({ row, col, playerId: localPlayerIndex });
     },

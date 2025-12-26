@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Modal } from "../../components/arcade";
 import { audio } from "../../sound/audio";
 import { useGameEngine } from "../hooks";

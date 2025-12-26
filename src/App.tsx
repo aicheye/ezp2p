@@ -1,5 +1,5 @@
 import { Analytics } from '@vercel/analytics/react';
-import { useCallback, useEffect, useRef, useState } from "react";
+import { use, useCallback, useEffect, useRef, useState } from "react";
 import type { MenuAction } from "./components/arcade";
 import {
   BootScreen,
@@ -103,7 +103,7 @@ function App() {
   const handleLeaveLobby = useCallback(() => {
     try {
       peer.leaveLobby();
-    } catch {}
+    } catch { }
     setCurrentScreen("menu");
   }, [peer]);
 
@@ -289,14 +289,14 @@ function App() {
       }
       : null;
 
-    // Players formatted for LobbyScreen component
-    const lobbyPlayers = peer.players.map((p) => ({
-      id: p.id,
-      name: p.name,
-      isHost: p.isHost,
-      isReady: p.isReady ?? false,
-      isConnected: p.isConnected !== false,
-    }));
+  // Players formatted for LobbyScreen component
+  const lobbyPlayers = peer.players.map((p) => ({
+    id: p.id,
+    name: p.name,
+    isHost: p.isHost,
+    isReady: p.isReady ?? false,
+    isConnected: p.isConnected !== false,
+  }));
 
   // Render current screen
   const renderScreen = () => {

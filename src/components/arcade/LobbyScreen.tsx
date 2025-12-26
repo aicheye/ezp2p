@@ -84,6 +84,7 @@ export function LobbyScreen({
       )}`;
       await navigator.clipboard.writeText(url);
       setCopied(true);
+      audio.playPoint();
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy:", err);
@@ -172,7 +173,7 @@ export function LobbyScreen({
                     checked={requiresRequest}
                     onChange={onToggleRequiresRequest}
                   />
-                  APPROVE JOINS
+                  REQUEST 2 JOIN
                 </label>
               </div>
             )}
