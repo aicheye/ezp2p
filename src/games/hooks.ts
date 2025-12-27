@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GameMessage, GameProps } from "./types";
+import audio from "../sound/audio";
 
 interface UseGameEngineOptions<TState, TMove> extends GameProps {
   initialState: TState | (() => TState);
@@ -106,6 +107,7 @@ export function useGameEngine<TState, TMove>({
     );
 
     const newState = applyMove(gameState, pendingMove.move);
+    audio.playLongBlip();
     setGameState(newState);
     setPendingMove(null);
     setFinalizeReceived(null);

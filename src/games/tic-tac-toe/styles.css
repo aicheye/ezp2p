@@ -32,6 +32,7 @@
   border: 1px solid transparent;
   transition: none;
   min-width: 100px;
+  border-radius: 4px;
 }
 
 .ttt-player__name {
@@ -97,59 +98,153 @@
 .ttt-board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 0.5rem;
-  border-radius: 4px;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2));
+  padding: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 0 30px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .ttt-cell {
-  width: 80px;
-  height: 80px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  border: 2px solid rgba(255, 255, 255, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-pixel);
   font-size: 3rem;
-  cursor: pointer;
+  cursor: default;
   transition: none;
   position: relative;
+  overflow: hidden;
 }
 
-.ttt-cell:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
+/* Empty cell hover effect - only when clickable and active */
+.ttt-board--active .ttt-cell:not(.ttt-cell--x):not(.ttt-cell--o) {
+  cursor: pointer;
+}
+
+.ttt-board--active .ttt-cell:not(:disabled):not(.ttt-cell--x):not(.ttt-cell--o):hover {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 0 15px rgba(255, 255, 255, 0.1),
+    inset 0 0 10px rgba(255, 255, 255, 0.05);
 }
 
 .ttt-cell:disabled {
   cursor: default;
 }
 
+/* X marker styling */
 .ttt-cell--x {
   color: var(--player1-color);
-  text-shadow: 0 0 5px var(--glow-player1);
+  text-shadow:
+    0 0 10px var(--glow-player1),
+    0 0 20px var(--glow-player1),
+    0 0 30px color-mix(in srgb, var(--player1-color) 50%, transparent);
+  background: color-mix(in srgb, var(--player1-color) 5%, transparent);
+  border-color: color-mix(in srgb, var(--player1-color) 20%, transparent);
 }
 
+/* O marker styling */
 .ttt-cell--o {
   color: var(--player2-color);
-  text-shadow: 0 0 5px var(--glow-player2);
+  text-shadow:
+    0 0 10px var(--glow-player2),
+    0 0 20px var(--glow-player2),
+    0 0 30px color-mix(in srgb, var(--player2-color) 50%, transparent);
+  background: color-mix(in srgb, var(--player2-color) 5%, transparent);
+  border-color: color-mix(in srgb, var(--player2-color) 20%, transparent);
 }
 
+/* Scanline reveal effect for newly placed marks */
+.ttt-cell--x::before,
+.ttt-cell--o::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  clip-path: inset(0 0 100% 0);
+  animation: ttt-scan-reveal 0.3s ease-out forwards;
+}
+
+/* Glowing scan line */
+.ttt-cell--x::after,
+.ttt-cell--o::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  top: 0;
+  animation: ttt-scanline 0.3s ease-out forwards;
+}
+
+.ttt-cell--x::after {
+  background: var(--player1-color);
+  box-shadow:
+    0 0 8px var(--player1-color),
+    0 0 16px var(--player1-color),
+    0 0 24px var(--glow-player1);
+}
+
+.ttt-cell--o::after {
+  background: var(--player2-color);
+  box-shadow:
+    0 0 8px var(--player2-color),
+    0 0 16px var(--player2-color),
+    0 0 24px var(--glow-player2);
+}
+
+/* Scan reveal animations */
+@keyframes ttt-scan-reveal {
+  0% {
+    clip-path: inset(0 0 100% 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes ttt-scanline {
+  0% {
+    top: 0;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/* Winner cells */
 .ttt-cell--winner {
   background: color-mix(in srgb, currentColor 20%, transparent);
   border-color: currentColor;
-  box-shadow: inset 0 0 20px color-mix(in srgb, currentColor 40%, transparent);
+  box-shadow:
+    0 0 20px color-mix(in srgb, currentColor 60%, transparent),
+    inset 0 0 20px color-mix(in srgb, currentColor 40%, transparent);
   animation: winner-pulse 1s infinite alternate;
 }
 
 @keyframes winner-pulse {
   from {
-    box-shadow: inset 0 0 20px color-mix(in srgb, currentColor 40%, transparent);
+    box-shadow:
+      0 0 20px color-mix(in srgb, currentColor 60%, transparent),
+      inset 0 0 20px color-mix(in srgb, currentColor 40%, transparent);
   }
   to {
-    box-shadow: inset 0 0 40px color-mix(in srgb, currentColor 60%, transparent);
+    box-shadow:
+      0 0 40px color-mix(in srgb, currentColor 80%, transparent),
+      inset 0 0 40px color-mix(in srgb, currentColor 60%, transparent);
   }
 }
 
@@ -163,8 +258,26 @@
 
 @media (max-width: 400px) {
   .ttt-cell {
-    width: 60px;
-    height: 60px;
-    font-size: 2rem;
+    width: 70px;
+    height: 70px;
+    font-size: 2.5rem;
+  }
+  
+  .ttt-board {
+    gap: 6px;
+    padding: 8px;
+  }
+  
+  .ttt-header {
+    gap: 1rem;
+  }
+  
+  .ttt-player {
+    min-width: 80px;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .ttt-player__symbol {
+    font-size: 1.5rem;
   }
 }

@@ -140,8 +140,6 @@ function DotsAndBoxesGame(props: GameProps) {
         return;
       if (isLineDrawn(gameState, line)) return;
 
-      // Play interaction sound
-      audio.playLongBlip();
       proposeMove({ line, playerId: localPlayerIndex });
     },
     [

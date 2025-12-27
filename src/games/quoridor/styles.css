@@ -1,0 +1,313 @@
+/* ============================================
+   QUORIDOR GAME STYLES
+   ============================================ */
+
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: var(--arcade-padding);
+}
+
+/* Header with player info */
+.qr-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  gap: 2rem;
+}
+
+/* Player info panels */
+.qr-player {
+  font-family: var(--font-terminal);
+  text-transform: uppercase;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid transparent;
+  min-width: 100px;
+}
+
+.qr-player__name {
+  font-family: var(--font-pixel);
+  font-size: 0.625rem;
+  margin-bottom: 0.25rem;
+}
+
+.qr-player__walls {
+  font-family: var(--font-pixel);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.qr-player--p1 {
+  color: var(--player1-color);
+}
+
+.qr-player--p2 {
+  color: var(--player2-color);
+}
+
+.qr-player--active {
+  border-color: currentColor;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  box-shadow:
+    0 0 15px color-mix(in srgb, currentColor 40%, transparent),
+    inset 0 0 10px color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.qr-player--active .qr-player__name,
+.qr-player--active .qr-player__walls {
+  text-shadow: 0 0 10px currentColor;
+}
+
+/* Turn indicator */
+.qr-turn-indicator {
+  font-family: var(--font-pixel);
+  font-size: 0.625rem;
+  padding: 0.5rem 1.5rem;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+}
+
+.qr-turn-indicator--p1 {
+  color: var(--player1-color);
+  box-shadow: 0 0 15px var(--glow-player1);
+}
+
+.qr-turn-indicator--p2 {
+  color: var(--player2-color);
+  box-shadow: 0 0 15px var(--glow-player2);
+}
+
+/* Board wrapper */
+.qr-board-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Game board */
+.qr-board {
+  position: relative;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid var(--arcade-dim);
+}
+
+/* Cells */
+.qr-cell {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: none;
+}
+
+.qr-cell--valid {
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.qr-cell--valid:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow:
+    inset 0 0 15px rgba(255, 255, 255, 0.2),
+    0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Corners (wall placement points) */
+.qr-corner {
+  background: transparent;
+  border-radius: 2px;
+  transition: none;
+}
+
+.qr-corner--active {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+  animation: corner-pulse 1.5s ease-in-out infinite;
+}
+
+.qr-corner--selected {
+  background: var(--arcade-accent);
+  box-shadow:
+    0 0 10px var(--arcade-accent),
+    0 0 20px var(--arcade-accent);
+}
+
+.qr-corner--endpoint {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.5),
+    0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.qr-corner--endpoint:hover {
+  background: var(--arcade-accent);
+  box-shadow:
+    0 0 15px var(--arcade-accent),
+    0 0 30px var(--arcade-accent);
+}
+
+@keyframes corner-pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Pawns */
+.qr-pawn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  z-index: 20;
+  transition: all 0.2s ease;
+}
+
+.qr-pawn--p1 {
+  background: var(--player1-color);
+  box-shadow:
+    0 0 10px var(--player1-color),
+    0 0 20px var(--glow-player1),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.qr-pawn--p2 {
+  background: var(--player2-color);
+  box-shadow:
+    0 0 10px var(--player2-color),
+    0 0 20px var(--glow-player2),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Walls */
+.qr-wall {
+  z-index: 15;
+  border-radius: 2px;
+}
+
+.qr-wall--placed {
+  background: var(--arcade-text);
+  box-shadow:
+    0 0 8px var(--arcade-text),
+    0 0 16px rgba(255, 255, 255, 0.4);
+}
+
+.qr-wall--preview {
+  opacity: 0.6;
+}
+
+.qr-wall--p1 {
+  background: var(--player1-color);
+  box-shadow:
+    0 0 8px var(--player1-color),
+    0 0 16px var(--glow-player1);
+}
+
+.qr-wall--p2 {
+  background: var(--player2-color);
+  box-shadow:
+    0 0 8px var(--player2-color),
+    0 0 16px var(--glow-player2);
+}
+
+/* Mode toggle button */
+.qr-mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.qr-mode-btn {
+  font-family: var(--font-pixel);
+  font-size: 0.625rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--arcade-dim);
+  background: transparent;
+  color: var(--arcade-dim);
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: none;
+}
+
+.qr-mode-btn:hover {
+  border-color: var(--arcade-accent);
+  color: var(--arcade-accent);
+}
+
+.qr-mode-btn--active {
+  border-color: var(--arcade-accent);
+  color: var(--arcade-accent);
+  background: color-mix(in srgb, var(--arcade-accent) 15%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--arcade-accent) 30%, transparent);
+}
+
+.qr-mode-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Action buttons */
+.qr-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .qr-actions {
+    margin-bottom: 2rem;
+  }
+  
+  .qr-header {
+    gap: 1rem;
+  }
+  
+  .qr-player {
+    min-width: 80px;
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .qr-player__name {
+    font-size: 0.5rem;
+  }
+  
+  .qr-player__walls {
+    font-size: 0.75rem;
+  }
+}
+
+/* Goal row indicators */
+.qr-goal-top,
+.qr-goal-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 5;
+}
+
+.qr-goal-top {
+  top: -5px;
+  background: var(--player1-color);
+  box-shadow: 0 0 8px var(--player1-color);
+}
+
+.qr-goal-bottom {
+  bottom: -5px;
+  background: var(--player2-color);
+  box-shadow: 0 0 8px var(--player2-color);
+}

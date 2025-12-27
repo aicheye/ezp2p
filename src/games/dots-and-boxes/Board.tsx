@@ -79,13 +79,10 @@ export function Board({
         result.push(
           <div
             key={`h-${row}-${col}`}
-            className={`dab-line dab-line--horizontal ${
-              isDrawn
-                ? `dab-line--drawn dab-line--p${drawnBy + 1}`
-                : isMyTurn
-                  ? `dab-line--preview-p${localPlayerIndex + 1}`
-                  : ""
-            }`}
+            className={`dab-line dab-line--horizontal ${isDrawn
+              ? `dab-line--drawn dab-line--p${drawnBy + 1}`
+              : ""
+              } ${!isDrawn && isMyTurn ? `dab-line--preview-p${localPlayerIndex + 1}` : ""}`}
             style={{
               left: col * gap + DOT_SIZE,
               top: row * gap + DOT_SIZE / 2,
@@ -122,13 +119,10 @@ export function Board({
         result.push(
           <div
             key={`v-${row}-${col}`}
-            className={`dab-line dab-line--vertical ${
-              isDrawn
-                ? `dab-line--drawn dab-line--p${drawnBy + 1}`
-                : isMyTurn
-                  ? `dab-line--preview-p${localPlayerIndex + 1}`
-                  : ""
-            }`}
+            className={`dab-line dab-line--vertical ${isDrawn
+              ? `dab-line--drawn dab-line--p${drawnBy + 1}`
+              : ""
+              } ${!isDrawn && isMyTurn ? `dab-line--preview-p${localPlayerIndex + 1}` : ""}`}
             style={{
               left: col * gap + DOT_SIZE / 2,
               top: row * gap + DOT_SIZE,

@@ -3,6 +3,7 @@
  * Pure functions for game state management.
  */
 
+
 export interface TicTacToeState {
   /** Board: [row][col] = playerId who marked it, or null */
   board: (number | null)[][];

@@ -35,22 +35,16 @@ export function Board({ state, isMyTurn, onCellClick }: BoardProps) {
   };
 
   return (
-    <div className="ttt-board">
+    <div className={`ttt-board ${isMyTurn ? "ttt-board--active" : ""}`}>
       {state.board.map((rowArr, rowIndex) =>
         rowArr.map((cellOwner, colIndex) => (
-          <button
+          <div
             key={`${rowIndex}-${colIndex}`}
             className={getCellClassName(rowIndex, colIndex, cellOwner)}
             onClick={() => onCellClick(rowIndex, colIndex)}
-            disabled={cellOwner !== null || !isMyTurn}
-            style={{
-              cursor:
-                cellOwner !== null || !isMyTurn ? "not-allowed" : "pointer",
-              padding: "0.5rem 0 0.25rem 0.5rem",
-            }}
           >
             {getCellContent(cellOwner)}
-          </button>
+          </div>
         )),
       )}
     </div>

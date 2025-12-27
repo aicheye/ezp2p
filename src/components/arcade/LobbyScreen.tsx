@@ -433,7 +433,7 @@ export function LobbyScreen({
           {isHost ? (
             <button
               className={`arcade-btn ${canStart ? "" : "arcade-btn--disabled"}`}
-              onClick={() => { if (canStart) { audio.playClick(); onStartGame(); } }}
+              onClick={() => { if (canStart) { onStartGame(); } }}
               disabled={!canStart}
               style={{ opacity: canStart ? 1 : 0.5 }}
             >
@@ -457,7 +457,7 @@ export function LobbyScreen({
           )}
           <button
             className="arcade-btn arcade-btn--secondary"
-            onClick={() => { audio.playClick(); onLeaveLobby(); }}
+            onClick={() => { onLeaveLobby() }}
           >
             LEAVE
           </button>

@@ -84,15 +84,11 @@ function TicTacToeGame(props: GameProps) {
   // Play win/loss SFX when the Game Over modal actually opens (aligned with UI)
   useEffect(() => {
     if (delayedGameOver && gameState.isGameOver) {
-      try {
-        if (gameState.winner === null) {
-          audio.playLongBlip();
-        } else if (gameState.winner === localPlayerIndex) {
-          audio.playWin();
-        } else {
-          audio.playLoss();
-        }
-      } catch { }
+      if (gameState.winner === localPlayerIndex) {
+        audio.playWin();
+      } else {
+        audio.playLoss();
+      }
     }
   }, [delayedGameOver, gameState.isGameOver, gameState.winner, localPlayerIndex]);
 
@@ -116,10 +112,6 @@ function TicTacToeGame(props: GameProps) {
         !!pendingMove
       )
         return;
-
-      try {
-        audio.playLongBlip();
-      } catch { }
 
       proposeMove({ row, col, playerId: localPlayerIndex });
     },

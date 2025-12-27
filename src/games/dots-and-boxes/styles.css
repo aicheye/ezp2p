@@ -145,16 +145,19 @@
 .dab-line {
   position: absolute;
   background: transparent;
-  cursor: pointer;
   transition: none;
   z-index: 5;
 }
 
-.dab-line:hover:not(.dab-line--drawn) {
+.dab-line--preview-p1:hover:not(.dab-line--drawn),
+.dab-line--preview-p2:hover:not(.dab-line--drawn),
+.dab-line--preview-p3:hover:not(.dab-line--drawn),
+.dab-line--preview-p4:hover:not(.dab-line--drawn) {
   background: rgba(255, 255, 255, 0.8);
   box-shadow:
     0 0 5px var(--arcade-text),
     0 0 10px rgba(255, 255, 255, 0.3);
+  cursor: pointer;
 }
 
 .dab-line--horizontal {

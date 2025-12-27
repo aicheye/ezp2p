@@ -83,9 +83,9 @@ class AudioManager {
         if (btn.disabled) {
           this.playErr();
         } else {
-          // Alternate click sounds
           this.playClick();
         }
+        
       } catch (err) {
         // ignore
       }
