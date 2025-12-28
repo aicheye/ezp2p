@@ -15,9 +15,9 @@ interface BoardProps {
   hoveredCorner: Position | null;
 }
 
-const CELL_SIZE = 44;
-const CORNER_SIZE = 12;
-const WALL_THICKNESS = 8;
+const CELL_SIZE = 28;
+const CORNER_SIZE = 8;
+const WALL_THICKNESS = 6;
 const WALL_LENGTH = 2 * CELL_SIZE + CORNER_SIZE;
 
 /**
@@ -141,11 +141,8 @@ export function Board({
           ? validEndpoints.some(ep => ep.position.row === row && ep.position.col === col)
           : false;
 
-        // Is it a standard internal corner (always visible)?
-        const isInternal = row <= gridSize - 2 && col <= gridSize - 2;
-
         // Only render if it's relevant (internal, or useful for interaction)
-        if (!isInternal && !isValidStart && !isEndpoint && !isSelected) {
+        if (!isValidStart && !isEndpoint && !isSelected) {
           continue;
         }
 
@@ -167,8 +164,7 @@ export function Board({
               width: CORNER_SIZE,
               height: CORNER_SIZE,
               cursor: isClickable ? "pointer" : "default",
-              // Ensure corners are above walls if they overlap (though pointer-events on walls helps)
-              zIndex: 25,
+              zIndex: 200,
             }}
             onClick={() => isClickable && onCornerClick({ row, col })}
             onMouseEnter={() => isEndpoint && onCornerHover({ row, col })}
@@ -270,9 +266,9 @@ export function Board({
       }}
     >
       {cells}
-      {corners}
       {wallElements}
       {previewWallElement}
+      {corners}
       {pawnElements}
     </div>
   );
