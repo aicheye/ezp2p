@@ -71,7 +71,8 @@ export function Board({
     return endpoint?.wall ?? null;
   }, [selectedCorner, hoveredCorner, validEndpoints]);
 
-  const boardSize = gridSize * CELL_SIZE + (gridSize - 1) * CORNER_SIZE;
+  // Layout: corner, cell, corner, cell, ... (gridSize cells, gridSize+1 corners)
+  const boardSize = gridSize * CELL_SIZE + (gridSize + 1) * CORNER_SIZE;
 
   // Render cells
   const cells = useMemo(() => {
@@ -79,8 +80,9 @@ export function Board({
     for (let row = 0; row < gridSize; row++) {
       for (let col = 0; col < gridSize; col++) {
         const isValidMove = validMoves.some(m => m.row === row && m.col === col);
-        const left = col * (CELL_SIZE + CORNER_SIZE);
-        const top = row * (CELL_SIZE + CORNER_SIZE);
+        // Cells start after the leading corner
+        const left = col * (CELL_SIZE + CORNER_SIZE) + CORNER_SIZE;
+        const top = row * (CELL_SIZE + CORNER_SIZE) + CORNER_SIZE;
 
         result.push(
           <div
@@ -104,8 +106,8 @@ export function Board({
   // Render pawns
   const pawnElements = useMemo(() => {
     return pawns.map((pos, playerIdx) => {
-      const left = pos.col * (CELL_SIZE + CORNER_SIZE) + CELL_SIZE / 2;
-      const top = pos.row * (CELL_SIZE + CORNER_SIZE) + CELL_SIZE / 2;
+      const left = pos.col * (CELL_SIZE + CORNER_SIZE) + CORNER_SIZE + CELL_SIZE / 2;
+      const top = pos.row * (CELL_SIZE + CORNER_SIZE) + CORNER_SIZE + CELL_SIZE / 2;
 
       return (
         <div
@@ -147,8 +149,9 @@ export function Board({
           continue;
         }
 
-        const left = (col + 1) * CELL_SIZE + col * CORNER_SIZE;
-        const top = (row + 1) * CELL_SIZE + row * CORNER_SIZE;
+        // Corners are at the grid intersections (start at 0)
+        const left = col * (CELL_SIZE + CORNER_SIZE);
+        const top = row * (CELL_SIZE + CORNER_SIZE);
 
         const isClickable = (wallMode && isMyTurn && (isValidStart || isEndpoint)) || isSelected;
         const showGlow = wallMode && isMyTurn && (isValidStart || isEndpoint || isSelected);
@@ -182,8 +185,8 @@ export function Board({
     return walls.map((wall, idx) => {
       // Wall position: corner at (row, col) is the top-left of the wall
       // The wall extends 2 cells in the given direction
-      const cornerLeft = (wall.col + 1) * CELL_SIZE + wall.col * CORNER_SIZE;
-      const cornerTop = (wall.row + 1) * CELL_SIZE + wall.row * CORNER_SIZE;
+      const cornerLeft = wall.col * (CELL_SIZE + CORNER_SIZE);
+      const cornerTop = wall.row * (CELL_SIZE + CORNER_SIZE);
 
       if (wall.orientation === "horizontal") {
         return (
@@ -192,7 +195,7 @@ export function Board({
             className="qr-wall qr-wall--placed"
             style={{
               position: "absolute",
-              left: cornerLeft + CORNER_SIZE,
+              left: Math.max(0, Math.min(cornerLeft + CORNER_SIZE, boardSize - WALL_LENGTH)),
               top: cornerTop + (CORNER_SIZE - WALL_THICKNESS) / 2,
               width: WALL_LENGTH,
               height: WALL_THICKNESS,
@@ -208,7 +211,7 @@ export function Board({
             style={{
               position: "absolute",
               left: cornerLeft + (CORNER_SIZE - WALL_THICKNESS) / 2,
-              top: cornerTop + CORNER_SIZE,
+              top: Math.max(0, Math.min(cornerTop + CORNER_SIZE, boardSize - WALL_LENGTH)),
               width: WALL_THICKNESS,
               height: WALL_LENGTH,
               pointerEvents: "none",
@@ -223,8 +226,8 @@ export function Board({
   const previewWallElement = useMemo(() => {
     if (!previewWall) return null;
 
-    const cornerLeft = (previewWall.col + 1) * CELL_SIZE + previewWall.col * CORNER_SIZE;
-    const cornerTop = (previewWall.row + 1) * CELL_SIZE + previewWall.row * CORNER_SIZE;
+    const cornerLeft = previewWall.col * (CELL_SIZE + CORNER_SIZE);
+    const cornerTop = previewWall.row * (CELL_SIZE + CORNER_SIZE);
 
     if (previewWall.orientation === "horizontal") {
       return (
@@ -232,7 +235,7 @@ export function Board({
           className={`qr-wall qr-wall--preview qr-wall--p${localPlayerIndex + 1}`}
           style={{
             position: "absolute",
-            left: cornerLeft + CORNER_SIZE,
+            left: Math.max(0, Math.min(cornerLeft + CORNER_SIZE, boardSize - WALL_LENGTH)),
             top: cornerTop + (CORNER_SIZE - WALL_THICKNESS) / 2,
             width: WALL_LENGTH,
             height: WALL_THICKNESS,
@@ -247,7 +250,7 @@ export function Board({
           style={{
             position: "absolute",
             left: cornerLeft + (CORNER_SIZE - WALL_THICKNESS) / 2,
-            top: cornerTop + CORNER_SIZE,
+            top: Math.max(0, Math.min(cornerTop + CORNER_SIZE, boardSize - WALL_LENGTH)),
             width: WALL_THICKNESS,
             height: WALL_LENGTH,
             pointerEvents: "none",

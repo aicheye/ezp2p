@@ -92,37 +92,36 @@ function wallBlocksMovement(
   from: Position,
   to: Position
 ): boolean {
-  const dr = to.row - from.row;
-  const dc = to.col - from.col;
-
+  // For each wall, explicitly enumerate the two adjacent cell pairs it blocks.
   for (const wall of walls) {
     if (wall.orientation === "horizontal") {
-      // Horizontal walls block vertical movement (N/S)
-      // Wall at (r, c) blocks movement between rows r and r+1 for columns c and c+1
-      if (dr !== 0 && dc === 0) {
-        const minRow = Math.min(from.row, to.row);
-        if (
-          wall.row === minRow &&
-          (wall.col === from.col || wall.col === from.col - 1)
-        ) {
-          if (from.col >= wall.col && from.col <= wall.col + 1) {
-            return true;
-          }
-        }
+      // Blocks movement between (r - 1, c) <-> (r, c) and (r - 1, c+1) <-> (r, c+1)
+      const a1 = { row: wall.row - 1, col: wall.col };
+      const b1 = { row: wall.row, col: wall.col };
+      const a2 = { row: wall.row - 1, col: wall.col + 1 };
+      const b2 = { row: wall.row, col: wall.col + 1 };
+
+      if (
+        (from.row === a1.row && from.col === a1.col && to.row === b1.row && to.col === b1.col) ||
+        (from.row === b1.row && from.col === b1.col && to.row === a1.row && to.col === a1.col) ||
+        (from.row === a2.row && from.col === a2.col && to.row === b2.row && to.col === b2.col) ||
+        (from.row === b2.row && from.col === b2.col && to.row === a2.row && to.col === a2.col)
+      ) {
+        return true;
       }
     } else {
-      // Vertical walls block horizontal movement (E/W)
-      // Wall at (r, c) blocks movement between cols c and c+1 for rows r and r+1
-      if (dc !== 0 && dr === 0) {
-        const minCol = Math.min(from.col, to.col);
-        if (
-          wall.col === minCol &&
-          (wall.row === from.row || wall.row === from.row - 1)
-        ) {
-          if (from.row >= wall.row && from.row <= wall.row + 1) {
-            return true;
-          }
-        }
+      // Vertical: blocks (r, c - 1) <-> (r, c) and (r+1, c - 1) <-> (r+1, c)
+      const a1 = { row: wall.row, col: wall.col - 1 };
+      const b1 = { row: wall.row, col: wall.col };
+      const a2 = { row: wall.row + 1, col: wall.col - 1 };
+      const b2 = { row: wall.row + 1, col: wall.col };
+      if (
+        (from.row === a1.row && from.col === a1.col && to.row === b1.row && to.col === b1.col) ||
+        (from.row === b1.row && from.col === b1.col && to.row === a1.row && to.col === a1.col) ||
+        (from.row === a2.row && from.col === a2.col && to.row === b2.row && to.col === b2.col) ||
+        (from.row === b2.row && from.col === b2.col && to.row === a2.row && to.col === a2.col)
+      ) {
+        return true;
       }
     }
   }
@@ -237,8 +236,17 @@ function wallsOverlap(w1: Wall, w2: Wall): boolean {
       return w1.col === w2.col && Math.abs(w1.row - w2.row) < 2;
     }
   } else {
-    // Cross in the center
-    return w1.row === w2.row && w1.col === w2.col;
+    // Prohibit perpendicular crossing (forming a '+' intersection).
+    // A horizontal wall at (r,c) spans corners (r,c) -> (r,c+2).
+    // A vertical wall at (r-1,c+1) spans corners (r-1,c+1) -> (r+1,c+1).
+    // Those two form a crossing; detect both orderings.
+    if (w1.orientation === "horizontal" && w2.orientation === "vertical") {
+      return w1.row === w2.row + 1 && w1.col + 1 === w2.col;
+    }
+    if (w1.orientation === "vertical" && w2.orientation === "horizontal") {
+      return w1.row + 1 === w2.row && w1.col === w2.col + 1;
+    }
+    return false;
   }
 }
 
@@ -310,9 +318,18 @@ export function getValidWallEndpoints(
 
   // Helper to check if a wall can be placed
   const canPlace = (wall: Wall): boolean => {
-    // Check bounds
-    if (wall.row < 0 || wall.row > gridSize - 2) return false;
-    if (wall.col < 0 || wall.col > gridSize - 2) return false;
+    // Check bounds depending on orientation to prevent "edge-only" walls.
+    // Horizontal walls block movement between rows (r-1) <-> r and span cols c and c+1.
+    // Valid horizontal wall coords: row in [1, gridSize-1], col in [0, gridSize-2].
+    if (wall.orientation === "horizontal") {
+      if (wall.row < 1 || wall.row > gridSize - 1) return false;
+      if (wall.col < 0 || wall.col > gridSize - 2) return false;
+    } else {
+      // Vertical walls block movement between cols (c-1) <-> c and span rows r and r+1.
+      // Valid vertical wall coords: row in [0, gridSize-2], col in [1, gridSize-1].
+      if (wall.row < 0 || wall.row > gridSize - 2) return false;
+      if (wall.col < 1 || wall.col > gridSize - 1) return false;
+    }
 
     // Check no overlap
     if (walls.some((w) => wallsOverlap(wall, w))) return false;
@@ -324,7 +341,8 @@ export function getValidWallEndpoints(
 
   // Horizontal wall extending RIGHT: click corner is at left end of wall
   // Wall positioned at (startCorner.row, startCorner.col)
-  if (startCorner.col <= gridSize - 3) {
+  // allow starting corners that place the wall endpoint on the outer edge
+  if (startCorner.col <= gridSize - 2) {
     const wall: Wall = {
       row: startCorner.row,
       col: startCorner.col,
@@ -356,7 +374,8 @@ export function getValidWallEndpoints(
 
   // Vertical wall extending DOWN: click corner is at top end of wall
   // Wall positioned at (startCorner.row, startCorner.col)
-  if (startCorner.row <= gridSize - 3) {
+  // allow starting corners that place the wall endpoint on the outer edge
+  if (startCorner.row <= gridSize - 2) {
     const wall: Wall = {
       row: startCorner.row,
       col: startCorner.col,
@@ -403,9 +422,9 @@ export function getValidWallStartCorners(
     return corners;
   }
 
-  // Corners are at intersections between cells (0 to gridSize-2 in each dimension)
-  for (let row = 0; row <= gridSize - 2; row++) {
-    for (let col = 0; col <= gridSize - 2; col++) {
+  // Corners are at intersections
+  for (let row = 0; row <= gridSize; row++) {
+    for (let col = 0; col <= gridSize; col++) {
       const endpoints = getValidWallEndpoints(state, { row, col }, playerIndex);
       if (endpoints.length > 0) {
         corners.push({ row, col });
@@ -430,8 +449,8 @@ export function canPlaceWall(
   if (wallsRemaining[playerIndex] <= 0) return false;
 
   // Check bounds
-  if (wall.row < 0 || wall.row > gridSize - 2) return false;
-  if (wall.col < 0 || wall.col > gridSize - 2) return false;
+  if (wall.row < 0 || wall.row > gridSize) return false;
+  if (wall.col < 0 || wall.col > gridSize) return false;
 
   // Check no overlap
   if (walls.some((w) => wallsOverlap(wall, w))) return false;
