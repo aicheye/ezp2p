@@ -38,6 +38,8 @@ const BOOT_LINES = [
   // Game loading
   { text: "Loading game modules:", delay: 2870 },
   { text: "  > dots-and-boxes.rom ........... LOADED", delay: 3070 },
+  { text: "  > quoridor.rom ........... LOADED", delay: 3070 },
+  { text: "  > tic-tac-toe.rom ........... LOADED", delay: 3070 },
   { text: "  > secret-game.rom .............. [LOCKED]", delay: 3220 },
   { text: "  Game registry: 1 title(s) available", delay: 3370 },
   { text: "", delay: 3470 },
